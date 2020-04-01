@@ -24,6 +24,10 @@ int user = 0; //순서 흑색 바둑알부터 시작
 
 int save[400][400];
 
+void Game_End_X();
+void Game_End_Y();
+void Game_End_Rdown();
+void Game_End_Ldown();
 int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdParam, int nCmdShow)                                                          // 메인함수
 {
     HWND hWnd;              //윈도우 핸들 선언
@@ -93,19 +97,20 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
         EndPaint(hWnd, &ps);
         return 0;
     }
-    case WM_LBUTTONDOWN:
+    case WM_LBUTTONDOWN: //마우스 왼 클릭시 진행
         hdc = GetDC(hWnd);
         mx = LOWORD(lParam);
         my = HIWORD(lParam);
 
         if (mx > (XPOS(0) - INTERVAL_Half) && my > (YPOS(0) - INTERVAL_Half)&& mx < (XPOS(X_Omoksize - 1) + INTERVAL_Half)&& my < (YPOS(Y_Omoksize - 1) + INTERVAL_Half))//안나가게 설정
         {
+            //오목돌 보정
             int x = mx / INTERVAL;
             int y = my / INTERVAL;
             x = x * INTERVAL;
             y = y * INTERVAL;
 
-            if (save[x][y] == 1 || save[x][y] == 2)//이미 돌이 있는 곳에 클릭했는지 확인!
+            if (save[x][y] == 1 || save[x][y] == 6)//이미 돌이 있는 곳에 클릭했는지 확인!
             {
                 MessageBox(hWnd,TEXT("중복된 칸에 클릭하셨습니다."),TEXT("중복!"), MB_OK);
             }
@@ -129,8 +134,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
                     wsprintf(str, TEXT("현재 나머지는 %d입니다."), user % 2);
                     TextOut(hdc, 500, 300, str, lstrlen(str));
                     user = user + 1;// 다음턴
-                    save[x][y] = user % 2 + 1; //돌의 정보 저장
+                    save[x][y] = user % 2 ; //돌의 정보 저장
+                    wsprintf(str, TEXT("현재 저장숫자는 %d입니다."), save[x][y]);
+                    TextOut(hdc, 500, 350, str, lstrlen(str));
                     //이밑에 게임승리
+                    Game_End_X(hWnd);
+                    Game_End_Y(hWnd);
+                    Game_End_Rdown(hWnd);
+                    Game_End_Ldown(hWnd);
                 }
                 else//백
                 {
@@ -145,7 +156,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
                     wsprintf(str, TEXT("현재 나머지는 %d입니다."), user % 2);
                     TextOut(hdc, 500, 300, str, lstrlen(str));
                     user = user + 1;// 다음턴
-                    save[x][y] = user % 2 + 1;//돌의 정보 저장
+                    save[x][y] = user % 2 + 6;//돌의 정보 저장
+                    wsprintf(str, TEXT("현재 저장숫자는 %d입니다."), save[x][y]);
+                    TextOut(hdc, 500, 350, str, lstrlen(str));
+                    //이밑 게임승리
+                    Game_End_X(hWnd);
+                    Game_End_Y(hWnd);
+                    Game_End_Rdown(hWnd);
+                    Game_End_Ldown(hWnd);
                 }
             }
 
@@ -162,4 +180,116 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
     }
     }
     return(DefWindowProc(hWnd, iMessage, wParam, lParam));
+}
+
+void Game_End_X(HWND hWnd)
+{
+    int ex, ey,ez;
+    int result = 0;
+    //X축 검사
+    for (ey = X_Space; ey < 400; ey = ey + 25)
+    {
+        for (ex = Y_Space; ex < 400; ex = ex + 25)
+        {
+            for (ez = 0; ez < 125; ez = ez + 25)
+            {
+                result = result + save[ex+ez][ey];
+                if (result == 5)
+                {
+                    MessageBox(hWnd, TEXT("흑이 승리하였습니다."), TEXT("게임끝!"), MB_OK);
+                    return 0;
+                }
+                else if (result == 30)
+                {
+                    MessageBox(hWnd, TEXT("백이 승리하였습니다."), TEXT("게임끝!"), MB_OK);
+                    return 0;
+                }
+            }
+            result = 0;
+        }
+    }
+}
+
+void Game_End_Y(HWND hWnd)
+{
+    int ex, ey,ez;
+    int result = 0;
+    //y축 검사
+    for (ex = X_Space; ex < 400; ex = ex + 25)
+    {
+        for (ey = Y_Space; ey < 400; ey = ey + 25)
+        {
+            for (ez = 0; ez < 125; ez = ez + 25) 
+            {
+                result = result + save[ex][ey+ez];
+                if (result == 5)
+                {
+                    MessageBox(hWnd, TEXT("흑이 승리하였습니다."), TEXT("게임끝!"), MB_OK);
+                    return 0;
+                }
+                else if (result == 30)
+                {
+                    MessageBox(hWnd, TEXT("백이 승리하였습니다."), TEXT("게임끝!"), MB_OK);
+                    return 0;
+                }
+            }
+            result = 0;
+        }
+    }
+}
+
+void Game_End_Rdown(HWND hWnd)
+{
+    int ex, ey, ez;
+    int result = 0;
+    //↘대각선 검사
+    for (ex = X_Space; ex < 400; ex = ex + 25)
+    {
+        for (ey = Y_Space; ey < 400; ey = ey + 25)
+        {
+            for (ez = 0; ez < 125; ez = ez + 25)
+            {
+                result = result + save[ex+ez][ey + ez];
+                if (result == 5)
+                {
+                    MessageBox(hWnd, TEXT("흑이 승리하였습니다."), TEXT("게임끝!"), MB_OK);
+                    return 0;
+                }
+                else if (result == 30)
+                {
+                    MessageBox(hWnd, TEXT("백이 승리하였습니다."), TEXT("게임끝!"), MB_OK);
+                    return 0;
+                }
+            }
+            result = 0;
+        }
+    }
+}
+
+void Game_End_Ldown(HWND hWnd)
+{
+    int ex, ey, ez;
+    int result = 0;
+    //↙대각선 검사
+    for (ex = X_Space; ex < 400; ex = ex + 25)
+    {
+        for (ey = 400; ey > Y_Space; ey = ey - 25)
+        {
+            for (ez = 0; ez < 125; ez = ez + 25)
+            {
+                result = result + save[ex-ez][ey + ez];
+                if (result == 5)
+                {
+                    MessageBox(hWnd, TEXT("흑이 승리하였습니다."), TEXT("게임끝!"), MB_OK);
+                    return 0;
+                }
+                else if (result == 30)
+                {
+                    MessageBox(hWnd, TEXT("백이 승리하였습니다."), TEXT("게임끝!"), MB_OK);
+                    return 0;
+                }
+            }
+            result = 0;
+        }
+    }
 }
