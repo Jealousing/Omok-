@@ -14,7 +14,7 @@ LPCTSTR lpszClass = TEXT("Omok");                                               
 #define X_Space 50
 #define Y_Space 50
 
-#define INTERVAL 30
+#define INTERVAL 25
 #define INTERVAL_Half INTERVAL/2
 
 #define XPOS(x)   (X_Space + (x) * INTERVAL) 
@@ -96,25 +96,31 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
         mx = LOWORD(lParam);
         my = HIWORD(lParam);
 
-        if (mx > (XPOS(0) - INTERVAL_Half) && my > (YPOS(0) - INTERVAL_Half)
-            && mx < (XPOS(X_Omoksize - 1) + INTERVAL_Half)
-            && my < (YPOS(Y_Omoksize - 1) + INTERVAL_Half))
+        if (mx > (XPOS(0) - INTERVAL_Half) && my > (YPOS(0) - INTERVAL_Half)&& mx < (XPOS(X_Omoksize - 1) + INTERVAL_Half)&& my < (YPOS(Y_Omoksize - 1) + INTERVAL_Half))//안나가게 설정
         {
-            if (user % 2 == 0)
+            if (user % 2 == 0)//흑
             {
+                int x = mx / INTERVAL;
+                int y = my/ INTERVAL;
+                x = x * INTERVAL;
+                y = y * INTERVAL;
                 HBRUSH myBrush = (HBRUSH)CreateSolidBrush(RGB(0, 0, 0));
                 HBRUSH oldBrush = (HBRUSH)SelectObject(hdc, myBrush);
-                Ellipse(hdc, mx - INTERVAL_Half, my - INTERVAL_Half, mx + INTERVAL_Half, my + INTERVAL_Half);
+                Ellipse(hdc, x - INTERVAL_Half, y - INTERVAL_Half, x + INTERVAL_Half, y + INTERVAL_Half);
                 SelectObject(hdc, oldBrush);
                 DeleteObject(myBrush);
             }
-            else
+            else//백
             {
-                Ellipse(hdc, mx - INTERVAL_Half, my - INTERVAL_Half, mx + INTERVAL_Half, my + INTERVAL_Half);
+                int x = mx / INTERVAL;
+                int y = my / INTERVAL;
+                x = x * INTERVAL;
+                y = y * INTERVAL;
+                Ellipse(hdc, x - INTERVAL_Half, y - INTERVAL_Half, x + INTERVAL_Half, y + INTERVAL_Half);
             }
         }
 
-        user = user+1;
+        user = user+1;// 다음턴
 
 
         ReleaseDC(hWnd, hdc);
