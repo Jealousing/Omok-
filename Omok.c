@@ -130,6 +130,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
                     TextOut(hdc, 500, 300, str, lstrlen(str));
                     user = user + 1;// 다음턴
                     save[x][y] = user % 2 + 1; //돌의 정보 저장
+                    //이밑에 게임승리
                 }
                 else//백
                 {
