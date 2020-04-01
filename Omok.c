@@ -22,6 +22,8 @@ LPCTSTR lpszClass = TEXT("Omok");                                               
 
 int user = 0; //순서 흑색 바둑알부터 시작
 
+int save[400][400];
+
 int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdParam, int nCmdShow)                                                          // 메인함수
 {
     HWND hWnd;              //윈도우 핸들 선언
@@ -98,29 +100,56 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 
         if (mx > (XPOS(0) - INTERVAL_Half) && my > (YPOS(0) - INTERVAL_Half)&& mx < (XPOS(X_Omoksize - 1) + INTERVAL_Half)&& my < (YPOS(Y_Omoksize - 1) + INTERVAL_Half))//안나가게 설정
         {
-            if (user % 2 == 0)//흑
-            {
-                int x = mx / INTERVAL;
-                int y = my/ INTERVAL;
-                x = x * INTERVAL;
-                y = y * INTERVAL;
-                HBRUSH myBrush = (HBRUSH)CreateSolidBrush(RGB(0, 0, 0));
-                HBRUSH oldBrush = (HBRUSH)SelectObject(hdc, myBrush);
-                Ellipse(hdc, x - INTERVAL_Half, y - INTERVAL_Half, x + INTERVAL_Half, y + INTERVAL_Half);
-                SelectObject(hdc, oldBrush);
-                DeleteObject(myBrush);
-            }
-            else//백
-            {
-                int x = mx / INTERVAL;
-                int y = my / INTERVAL;
-                x = x * INTERVAL;
-                y = y * INTERVAL;
-                Ellipse(hdc, x - INTERVAL_Half, y - INTERVAL_Half, x + INTERVAL_Half, y + INTERVAL_Half);
-            }
-        }
+            int x = mx / INTERVAL;
+            int y = my / INTERVAL;
+            x = x * INTERVAL;
+            y = y * INTERVAL;
 
-        user = user+1;// 다음턴
+            if (save[x][y] == 1 || save[x][y] == 2)//이미 돌이 있는 곳에 클릭했는지 확인!
+            {
+                MessageBox(hWnd,TEXT("중복된 칸에 클릭하셨습니다."),TEXT("중복!"), MB_OK);
+            }
+            else// 돌이없으면 실행
+            {
+                if (user % 2 == 0)//흑
+                {
+
+                    HBRUSH myBrush = (HBRUSH)CreateSolidBrush(RGB(0, 0, 0));
+                    HBRUSH oldBrush = (HBRUSH)SelectObject(hdc, myBrush);
+                    Ellipse(hdc, x - INTERVAL_Half, y - INTERVAL_Half, x + INTERVAL_Half, y + INTERVAL_Half);
+                    SelectObject(hdc, oldBrush);
+                    DeleteObject(myBrush);
+
+                    TextOut(hdc, 500, 100, TEXT("백돌의 차례입니다."), 10);//차례 확인
+                    TCHAR str[128];
+                    wsprintf(str, TEXT("현재 X좌표는 %d입니다."), x);
+                    TextOut(hdc, 500, 200, str, lstrlen(str));
+                    wsprintf(str, TEXT("현재 Y좌표는 %d입니다."), y);
+                    TextOut(hdc, 500, 250, str, lstrlen(str));
+                    wsprintf(str, TEXT("현재 나머지는 %d입니다."), user % 2);
+                    TextOut(hdc, 500, 300, str, lstrlen(str));
+                    user = user + 1;// 다음턴
+                    save[x][y] = user % 2 + 1; //돌의 정보 저장
+                }
+                else//백
+                {
+                    Ellipse(hdc, x - INTERVAL_Half, y - INTERVAL_Half, x + INTERVAL_Half, y + INTERVAL_Half);
+
+                    TextOut(hdc, 500, 100, TEXT("흑돌의 차례입니다."), 10);//차례 확인 
+                    TCHAR str[128];
+                    wsprintf(str, TEXT("현재 X좌표는 %d입니다."), x);
+                    TextOut(hdc, 500, 200, str, lstrlen(str));
+                    wsprintf(str, TEXT("현재 Y좌표는 %d입니다."), y);
+                    TextOut(hdc, 500, 250, str, lstrlen(str));
+                    wsprintf(str, TEXT("현재 나머지는 %d입니다."), user % 2);
+                    TextOut(hdc, 500, 300, str, lstrlen(str));
+                    user = user + 1;// 다음턴
+                    save[x][y] = user % 2 + 1;//돌의 정보 저장
+                }
+            }
+
+           
+        }
 
 
         ReleaseDC(hWnd, hdc);
